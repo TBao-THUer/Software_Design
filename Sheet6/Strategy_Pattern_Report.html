@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Strategy Pattern Report</title>
+<style>
+  @page { margin: 2cm; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    line-height: 1.6;
+    color: #1a1a1a;
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 0 20px;
+  }
+  h1 { color: #1a3c5e; border-bottom: 3px solid #1a3c5e; padding-bottom: 10px; font-size: 26px; }
+  h2 { color: #2a5f8f; margin-top: 30px; font-size: 20px; }
+  h3 { color: #3a7fbf; font-size: 16px; }
+  .header-info { color: #555; font-size: 14px; margin-bottom: 30px; }
+  table { border-collapse: collapse; width: 100%; margin: 15px 0; }
+  th, td { border: 1px solid #ccc; padding: 10px 12px; text-align: left; font-size: 14px; vertical-align: top; }
+  th { background-color: #1a3c5e; color: white; }
+  tr:nth-child(even) { background-color: #f4f8fc; }
+  code { background: #f0f4f8; padding: 2px 6px; border-radius: 3px; font-size: 13px; font-family: 'Consolas', monospace; }
+  pre { background: #f0f4f8; padding: 14px; border-radius: 6px; overflow-x: auto; font-size: 13px; border-left: 4px solid #2a5f8f; }
+  pre code { background: none; padding: 0; }
+  .badge-new { background: #27ae60; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+  .badge-modified { background: #e67e22; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+  .badge-unchanged { background: #95a5a6; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+  .section { margin-bottom: 25px; }
+  .diagram-box { background: #f8fafc; border: 2px solid #d0dde8; border-radius: 8px; padding: 20px; margin: 15px 0; font-family: 'Consolas', monospace; font-size: 13px; white-space: pre; line-height: 1.4; }
+</style>
+</head>
+<body>
+
+<h1>Strategy Pattern Report &mdash; Exercise 6</h1>
+<div class="header-info">
+  <strong>Project:</strong> Website Monitoring System &nbsp;|&nbsp;
+  <strong>Date:</strong> June 17, 2026 &nbsp;|&nbsp;
+  <strong>Pattern:</strong> Strategy (Behavioral)
+</div>
+
+<div class="section">
+<h2>1. Goal</h2>
+<p>
+  Exercise 5 introduced the <strong>Observer</strong> pattern so that a
+  <code>Website</code> notifies its subscribers automatically when its content
+  changes. Change-detection, however, was hard-coded as a single exact-string
+  comparison inside <code>updateContent()</code>:
+</p>
+<pre><code>if (!currentContent.equals(cachedContent)) {
+    notifyObservers();
+}</code></pre>
+<p>
+  Exercise 6 requires the system to support <strong>multiple comparison
+  strategies</strong> for deciding when a website has "changed":
+</p>
+<ol>
+  <li><strong>Identical content size</strong> &mdash; change only when the length differs.</li>
+  <li><strong>Identical HTML content</strong> &mdash; change on any raw-HTML difference.</li>
+  <li><strong>Identical text content</strong> &mdash; change only when the visible text differs (markup-only edits are ignored).</li>
+</ol>
+<p>
+  Hard-coding three different <code>if</code> branches would violate the
+  Open/Closed Principle and force <code>Website</code> to change every time a new
+  rule is added. The <strong>Strategy pattern</strong> solves this by extracting
+  the comparison rule into interchangeable objects.
+</p>
+</div>
+
+<div class="section">
+<h2>2. Strategy Pattern Solution</h2>
+<p>
+  The comparison algorithm is encapsulated behind a <code>ComparisonStrategy</code>
+  interface. <code>Website</code> becomes the <strong>Context</strong>: it holds a
+  reference to a strategy and delegates change-detection to it, without knowing
+  which concrete rule is in use. The strategy can be swapped at runtime through
+  <code>setComparisonStrategy()</code>.
+</p>
+
+<div class="diagram-box">
+                        &laquo;interface&raquo;
+   Website  ───uses──►  ComparisonStrategy
+   (Context)            + isIdentical(String, String): boolean
+   - comparisonStrategy + getName(): String
+   + setComparisonStrategy(..)        ▲
+   + updateContent(String)           ╱│╲  implements
+                           ┌──────────┼──────────┐
+                           │          │          │
+              ContentSizeComparison  HtmlContent  TextContent
+                                     Comparison   Comparison
+</div>
+
+<table>
+  <tr><th>Role</th><th>Class</th><th>Responsibility</th></tr>
+  <tr><td>Context</td><td><code>Website</code></td><td>Holds a strategy; calls <code>isIdentical()</code> to decide whether to notify observers</td></tr>
+  <tr><td>Strategy</td><td><code>ComparisonStrategy</code></td><td>Common interface for all comparison rules</td></tr>
+  <tr><td>Concrete Strategy</td><td><code>ContentSizeComparison</code></td><td>Identical when the character counts match</td></tr>
+  <tr><td>Concrete Strategy</td><td><code>HtmlContentComparison</code></td><td>Identical when the raw HTML matches exactly</td></tr>
+  <tr><td>Concrete Strategy</td><td><code>TextContentComparison</code></td><td>Identical when the tag-stripped text matches</td></tr>
+</table>
+</div>
+
+<div class="section">
+<h2>3. File Changes Summary</h2>
+<table>
+  <tr><th>File</th><th>Status</th><th>Description</th></tr>
+  <tr><td><code>ComparisonStrategy.java</code></td><td><span class="badge-new">NEW</span></td><td>Strategy interface: <code>isIdentical(String, String)</code>, <code>getName()</code></td></tr>
+  <tr><td><code>ContentSizeComparison.java</code></td><td><span class="badge-new">NEW</span></td><td>Compares by content length</td></tr>
+  <tr><td><code>HtmlContentComparison.java</code></td><td><span class="badge-new">NEW</span></td><td>Compares raw HTML strings exactly</td></tr>
+  <tr><td><code>TextContentComparison.java</code></td><td><span class="badge-new">NEW</span></td><td>Strips tags, normalises whitespace, then compares</td></tr>
+  <tr><td><code>Website.java</code></td><td><span class="badge-modified">MODIFIED</span></td><td>Now a Context: holds <code>ComparisonStrategy</code>, delegates change-detection to it</td></tr>
+  <tr><td><code>Main.java</code></td><td><span class="badge-modified">MODIFIED</span></td><td>Demonstrates all three strategies on different websites</td></tr>
+  <tr><td><code>Subject / Observer / User / Subscription / Notification / NotificationPreference / MonitoringSystem / SubscriptionStatus</code></td><td><span class="badge-unchanged">UNCHANGED</span></td><td>Observer-pattern classes from Exercise 5 are untouched</td></tr>
+</table>
+</div>
+
+<div class="section">
+<h2>4. Key Code</h2>
+
+<h3>4.1 The Strategy interface</h3>
+<pre><code>public interface ComparisonStrategy {
+    // true  -> contents are identical (no change, no notification)
+    // false -> contents differ      (change -> notify observers)
+    boolean isIdentical(String oldContent, String newContent);
+    String getName();
+}</code></pre>
+
+<h3>4.2 The three concrete strategies</h3>
+<pre><code>// 1. Identical content size
+public boolean isIdentical(String oldContent, String newContent) {
+    return oldContent.length() == newContent.length();
+}
+
+// 2. Identical HTML content
+public boolean isIdentical(String oldContent, String newContent) {
+    return oldContent.equals(newContent);
+}
+
+// 3. Identical text content
+public boolean isIdentical(String oldContent, String newContent) {
+    return extractText(oldContent).equals(extractText(newContent));
+}
+private String extractText(String html) {
+    return html.replaceAll("&lt;[^&gt;]*&gt;", " ")
+               .replaceAll("\\s+", " ")
+               .trim();
+}</code></pre>
+
+<h3>4.3 Website as the Context</h3>
+<pre><code>private ComparisonStrategy comparisonStrategy;
+
+public void setComparisonStrategy(ComparisonStrategy strategy) {
+    this.comparisonStrategy = strategy;          // swap rule at runtime
+}
+
+public void updateContent(String contentUpdated) {
+    this.currentContent = contentUpdated;
+    if (!comparisonStrategy.isIdentical(cachedContent, currentContent)) {
+        notifyObservers();                       // delegated decision
+        this.cachedContent = currentContent;
+    }
+}</code></pre>
+</div>
+
+<div class="section">
+<h2>5. Demonstration (Main.java)</h2>
+<p>Each website is given a different strategy; the same sequence of edits produces different notification behaviour:</p>
+<table>
+  <tr><th>Strategy</th><th>Edit</th><th>Detected as change?</th></tr>
+  <tr><td rowspan="3">Identical content size</td><td><code>"" &rarr; "12345"</code> (0&rarr;5)</td><td>Yes &mdash; notify</td></tr>
+  <tr><td><code>"12345" &rarr; "ABCDE"</code> (5&rarr;5)</td><td>No &mdash; same size</td></tr>
+  <tr><td><code>"12345" &rarr; "Longer content"</code> (5&rarr;14)</td><td>Yes &mdash; notify</td></tr>
+  <tr><td rowspan="2">Identical HTML content</td><td><code>&lt;h1&gt;News&lt;/h1&gt;</code> repeated</td><td>No &mdash; identical HTML</td></tr>
+  <tr><td><code>&lt;h1&gt;News&lt;/h1&gt; &rarr; &lt;h1&gt;Breaking News&lt;/h1&gt;</code></td><td>Yes &mdash; notify</td></tr>
+  <tr><td rowspan="2">Identical text content</td><td><code>&lt;p&gt;Hello world&lt;/p&gt; &rarr; &lt;div&gt;&lt;b&gt;Hello world&lt;/b&gt;&lt;/div&gt;</code></td><td>No &mdash; same visible text</td></tr>
+  <tr><td><code>&lt;p&gt;Hello world&lt;/p&gt; &rarr; &lt;p&gt;Hello universe&lt;/p&gt;</code></td><td>Yes &mdash; text changed</td></tr>
+</table>
+</div>
+
+<div class="section">
+<h2>6. Coding Conventions</h2>
+<p>The following conventions were applied consistently across the codebase (Exercise 6, task 3):</p>
+<table>
+  <tr><th>Area</th><th>Convention used</th></tr>
+  <tr><td>Naming &mdash; classes</td><td><code>PascalCase</code>, nouns describing the role (<code>Website</code>, <code>ComparisonStrategy</code>, <code>ContentSizeComparison</code>).</td></tr>
+  <tr><td>Naming &mdash; interfaces</td><td>Named by capability/role rather than an <code>I</code> prefix (<code>Subject</code>, <code>Observer</code>, <code>ComparisonStrategy</code>), following standard Java style.</td></tr>
+  <tr><td>Naming &mdash; methods &amp; fields</td><td><code>camelCase</code>; methods are verbs (<code>updateContent</code>, <code>isIdentical</code>, <code>notifyObservers</code>); boolean queries use an <code>is</code> prefix.</td></tr>
+  <tr><td>Naming &mdash; constants / enums</td><td><code>UPPER_SNAKE_CASE</code> enum constants (<code>FREQUENCY.DAILY</code>, <code>SubscriptionStatus.ACTIVE</code>).</td></tr>
+  <tr><td>Encapsulation</td><td>Fields are <code>private</code>; access is through getters/setters. Collaborators are passed in via constructors or setters (dependency injection of the strategy).</td></tr>
+  <tr><td>Class layout</td><td>Fields first, then constructors, then public methods, then helpers, then <code>toString()</code>. One top-level class per file (file name matches the public class).</td></tr>
+  <tr><td>Indentation &amp; braces</td><td>4-space indentation, K&amp;R brace style (opening brace on the same line), consistent throughout.</td></tr>
+  <tr><td>Comments</td><td>Javadoc <code>/** ... */</code> on public types and non-trivial methods; short inline <code>//</code> comments explain intent, not mechanics.</td></tr>
+  <tr><td>Overrides</td><td>All interface/inherited implementations are marked with <code>@Override</code>.</td></tr>
+  <tr><td>Single Responsibility</td><td>Each class has one job; new behaviour is added by writing a new class (Open/Closed), not by editing existing ones.</td></tr>
+  <tr><td>Defaults</td><td><code>Website</code> provides a default strategy (<code>HtmlContentComparison</code>) via constructor chaining so existing call sites keep working.</td></tr>
+</table>
+</div>
+
+<div class="section">
+<h2>7. Benefits</h2>
+<table>
+  <tr><th>Aspect</th><th>Before (Exercise 5)</th><th>After (Exercise 6)</th></tr>
+  <tr><td>Comparison rule</td><td>One hard-coded <code>equals()</code> check</td><td>Any number of interchangeable strategies</td></tr>
+  <tr><td>Adding a new rule</td><td>Edit <code>Website.updateContent()</code></td><td>Add a new <code>ComparisonStrategy</code> class only</td></tr>
+  <tr><td>Open/Closed Principle</td><td>Violated</td><td>Respected</td></tr>
+  <tr><td>Runtime flexibility</td><td>Fixed at compile time</td><td>Swappable per website, at runtime</td></tr>
+  <tr><td>Observer pattern</td><td>Working</td><td>Unchanged &mdash; Strategy composes cleanly with it</td></tr>
+</table>
+</div>
+
+</body>
+</html>

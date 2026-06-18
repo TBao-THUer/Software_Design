@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Strategy Pattern - UML Diagram</title>
+<style>
+  body { margin: 0; padding: 30px; background: white; font-family: Arial, sans-serif; }
+  h2 { text-align: center; color: #1a3c5e; }
+  .canvas { position: relative; width: 1080px; height: 720px; margin: 0 auto; }
+  .class-box {
+    position: absolute;
+    border: 2px solid #000;
+    background: white;
+    min-width: 180px;
+  }
+  .class-name {
+    text-align: center;
+    font-weight: bold;
+    padding: 8px 12px;
+    border-bottom: 2px solid #000;
+    font-size: 15px;
+  }
+  .class-name.interface { font-style: italic; }
+  .stereotype {
+    text-align: center;
+    font-size: 12px;
+    font-style: italic;
+    padding-top: 4px;
+  }
+  .attrs, .methods {
+    padding: 6px 12px;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .attrs { border-bottom: 2px solid #000; }
+  svg.lines {
+    position: absolute;
+    top: 0; left: 0;
+    width: 1080px;
+    height: 720px;
+    pointer-events: none;
+  }
+  .label {
+    position: absolute;
+    font-size: 12px;
+    font-style: italic;
+    color: #333;
+    background: white;
+    padding: 0 4px;
+  }
+  .mult {
+    position: absolute;
+    font-size: 13px;
+    font-weight: bold;
+    color: #000;
+  }
+</style>
+</head>
+<body>
+<h2>Strategy Pattern &mdash; Website Content Comparison</h2>
+<div class="canvas">
+
+  <svg class="lines" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <marker id="triangle" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="12" markerHeight="12" orient="auto">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="white" stroke="black" stroke-width="1"/>
+      </marker>
+      <marker id="open-arrow" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="14" markerHeight="14" orient="auto">
+        <path d="M 1 1 L 11 6 L 1 11" fill="none" stroke="black" stroke-width="1.5"/>
+      </marker>
+    </defs>
+
+    <!-- Website (Context) ---> ComparisonStrategy (association, "uses") -->
+    <line x1="430" y1="150" x2="600" y2="150" stroke="black" stroke-width="1.5" marker-end="url(#open-arrow)"/>
+
+    <!-- Realization tree: three concrete strategies implement ComparisonStrategy -->
+    <!-- trunk from interface bottom-center down to the horizontal bus -->
+    <line x1="730" y1="465" x2="730" y2="222" stroke="black" stroke-width="1.5" stroke-dasharray="8,4" marker-end="url(#triangle)"/>
+    <!-- horizontal bus -->
+    <line x1="425" y1="465" x2="975" y2="465" stroke="black" stroke-width="1.5" stroke-dasharray="8,4"/>
+    <!-- risers down to each concrete class -->
+    <line x1="425" y1="465" x2="425" y2="500" stroke="black" stroke-width="1.5" stroke-dasharray="8,4"/>
+    <line x1="700" y1="465" x2="700" y2="500" stroke="black" stroke-width="1.5" stroke-dasharray="8,4"/>
+    <line x1="975" y1="465" x2="975" y2="500" stroke="black" stroke-width="1.5" stroke-dasharray="8,4"/>
+  </svg>
+
+  <!-- Website (Context) -->
+  <div class="class-box" style="left: 180px; top: 70px; width: 250px;">
+    <div class="class-name">Website &nbsp;<span style="font-weight:normal;font-style:italic;font-size:12px;">(Context)</span></div>
+    <div class="attrs">
+      - urlWebsite: String<br>
+      - currentContent: String<br>
+      - cachedContent: String<br>
+      - comparisonStrategy: ComparisonStrategy
+    </div>
+    <div class="methods">
+      + setComparisonStrategy(ComparisonStrategy): void<br>
+      + updateContent(String): void<br>
+      + notifyObservers(): void
+    </div>
+  </div>
+
+  <!-- ComparisonStrategy interface -->
+  <div class="class-box" style="left: 600px; top: 90px; width: 260px;">
+    <div class="stereotype">&laquo;interface&raquo;</div>
+    <div class="class-name interface">ComparisonStrategy</div>
+    <div class="attrs">&nbsp;</div>
+    <div class="methods">
+      + isIdentical(String, String): boolean<br>
+      + getName(): String
+    </div>
+  </div>
+
+  <span class="label" style="left: 470px; top: 128px;">uses &#9656;</span>
+  <span class="mult" style="left: 440px; top: 158px;">1</span>
+
+  <!-- ContentSizeComparison -->
+  <div class="class-box" style="left: 300px; top: 500px; width: 250px;">
+    <div class="class-name">ContentSizeComparison</div>
+    <div class="attrs">&nbsp;</div>
+    <div class="methods">
+      + isIdentical(String, String): boolean<br>
+      + getName(): String
+    </div>
+  </div>
+
+  <!-- HtmlContentComparison -->
+  <div class="class-box" style="left: 575px; top: 500px; width: 250px;">
+    <div class="class-name">HtmlContentComparison</div>
+    <div class="attrs">&nbsp;</div>
+    <div class="methods">
+      + isIdentical(String, String): boolean<br>
+      + getName(): String
+    </div>
+  </div>
+
+  <!-- TextContentComparison -->
+  <div class="class-box" style="left: 850px; top: 500px; width: 250px;">
+    <div class="class-name">TextContentComparison</div>
+    <div class="attrs">- extractText(String): String</div>
+    <div class="methods">
+      + isIdentical(String, String): boolean<br>
+      + getName(): String
+    </div>
+  </div>
+
+  <span class="label" style="left: 720px; top: 380px;">implements</span>
+
+</div>
+
+<p style="text-align:center; max-width:900px; margin:20px auto; font-size:14px; color:#444;">
+  <strong>Context</strong> = <code>Website</code> holds a reference to a <strong>Strategy</strong>
+  (<code>ComparisonStrategy</code>) and delegates change-detection to it. The three
+  <strong>concrete strategies</strong> implement different rules &mdash; identical content size,
+  identical HTML, and identical text &mdash; and can be swapped at runtime via
+  <code>setComparisonStrategy()</code>.
+</p>
+
+</body>
+</html>

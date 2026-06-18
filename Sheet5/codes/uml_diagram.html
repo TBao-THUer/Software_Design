@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  body { margin: 0; padding: 30px; background: white; font-family: Arial, sans-serif; }
+  .canvas { position: relative; width: 1100px; height: 1150px; }
+  .class-box {
+    position: absolute;
+    border: 2px solid #000;
+    background: white;
+    min-width: 180px;
+  }
+  .class-name {
+    text-align: center;
+    font-weight: bold;
+    padding: 8px 12px;
+    border-bottom: 2px solid #000;
+    font-size: 15px;
+  }
+  .class-name.interface {
+    font-style: italic;
+  }
+  .stereotype {
+    text-align: center;
+    font-size: 12px;
+    font-style: italic;
+    padding-top: 4px;
+  }
+  .attrs, .methods {
+    padding: 6px 12px;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .attrs { border-bottom: 2px solid #000; }
+  .methods { }
+  svg.lines {
+    position: absolute;
+    top: 0; left: 0;
+    width: 1100px;
+    height: 1150px;
+    pointer-events: none;
+  }
+  .label {
+    position: absolute;
+    font-size: 12px;
+    font-style: italic;
+    color: #333;
+  }
+  .mult {
+    position: absolute;
+    font-size: 13px;
+    font-weight: bold;
+    color: #000;
+  }
+</style>
+</head>
+<body>
+<div class="canvas">
+
+  <!-- SVG for lines/arrows -->
+  <svg class="lines" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <marker id="triangle" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="12" markerHeight="12" orient="auto">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="white" stroke="black" stroke-width="1"/>
+      </marker>
+      <marker id="diamond-filled" viewBox="0 0 14 10" refX="14" refY="5" markerWidth="14" markerHeight="10" orient="auto">
+        <path d="M 0 5 L 7 0 L 14 5 L 7 10 z" fill="black" stroke="black" stroke-width="1"/>
+      </marker>
+      <marker id="diamond-open" viewBox="0 0 14 10" refX="14" refY="5" markerWidth="14" markerHeight="10" orient="auto">
+        <path d="M 0 5 L 7 0 L 14 5 L 7 10 z" fill="white" stroke="black" stroke-width="1"/>
+      </marker>
+    </defs>
+
+    <!-- Subject interface to Observer interface (dashed association) -->
+    <line x1="310" y1="95" x2="500" y2="95" stroke="black" stroke-width="1.5" stroke-dasharray="8,4"/>
+    <text x="370" y="85" font-size="12" font-style="italic" fill="#333">uses ▸</text>
+
+    <!-- Website implements Subject -->
+    <line x1="190" y1="170" x2="190" y2="270" stroke="black" stroke-width="1.5" stroke-dasharray="8,4" marker-start="url(#triangle)"/>
+
+    <!-- Subscription implements Observer -->
+    <line x1="610" y1="170" x2="610" y2="290" stroke="black" stroke-width="1.5" stroke-dasharray="8,4" marker-start="url(#triangle)"/>
+
+    <!-- System to Website (aggregation) -->
+    <line x1="190" y1="440" x2="190" y2="530" stroke="black" stroke-width="1.5" marker-end="url(#diamond-open)"/>
+
+    <!-- System to User (aggregation) -->
+    <line x1="500" y1="530" x2="500" y2="440" stroke="black" stroke-width="1.5" marker-start="url(#diamond-open)"/>
+
+    <!-- User to Subscription (composition) -->
+    <line x1="610" y1="650" x2="610" y2="520" stroke="black" stroke-width="1.5" marker-start="url(#diamond-filled)"/>
+
+    <!-- Website to Subscription (observers list) -->
+    <line x1="310" y1="370" x2="500" y2="700" stroke="black" stroke-width="1.5"/>
+
+    <!-- Subscription to Notification (composition) -->
+    <line x1="540" y1="850" x2="220" y2="950" stroke="black" stroke-width="1.5" marker-start="url(#diamond-filled)"/>
+
+    <!-- Subscription to NotificationPreference -->
+    <line x1="700" y1="850" x2="870" y2="950" stroke="black" stroke-width="1.5"/>
+  </svg>
+
+  <!-- <<interface>> Subject -->
+  <div class="class-box" style="left: 60px; top: 20px; width: 250px;">
+    <div class="stereotype">&laquo;interface&raquo;</div>
+    <div class="class-name interface">Subject</div>
+    <div class="attrs" style="border-bottom: 2px solid #000;">&nbsp;</div>
+    <div class="methods">
+      + addObserver(Observer): void<br>
+      + removeObserver(Observer): void<br>
+      + notifyObservers(): void
+    </div>
+  </div>
+
+  <!-- <<interface>> Observer -->
+  <div class="class-box" style="left: 500px; top: 20px; width: 230px;">
+    <div class="stereotype">&laquo;interface&raquo;</div>
+    <div class="class-name interface">Observer</div>
+    <div class="attrs" style="border-bottom: 2px solid #000;">&nbsp;</div>
+    <div class="methods">
+      + update(Website): void
+    </div>
+  </div>
+
+  <!-- Website -->
+  <div class="class-box" style="left: 40px; top: 270px; width: 270px;">
+    <div class="class-name">Website</div>
+    <div class="attrs">
+      + URLWebsite: String<br>
+      - currentContent: String<br>
+      - cachedContent: String<br>
+      - observers: List&lt;Observer&gt;
+    </div>
+    <div class="methods">
+      + updateContent(String): void<br>
+      + fetchContent(): String<br>
+      + addObserver(Observer): void<br>
+      + removeObserver(Observer): void<br>
+      + notifyObservers(): void
+    </div>
+  </div>
+
+  <!-- MonitoringSystem -->
+  <div class="class-box" style="left: 350px; top: 530px; width: 290px;">
+    <div class="class-name">MonitoringSystem</div>
+    <div class="attrs">
+      + listUsers: User[]<br>
+      + listWeb: Website[]
+    </div>
+    <div class="methods">
+      + addUser(User): void<br>
+      + addWebsite(Website): void
+    </div>
+  </div>
+
+  <!-- Multiplicity labels for System -->
+  <span class="mult" style="left: 170px; top: 515px;">*</span>
+  <span class="mult" style="left: 510px; top: 515px;">*</span>
+
+  <!-- User -->
+  <div class="class-box" style="left: 700px; top: 280px; width: 290px;">
+    <div class="class-name">User</div>
+    <div class="attrs">
+      + userId: int<br>
+      + name: String<br>
+      + email: String
+    </div>
+    <div class="methods">
+      + register(Website, FREQUENCY, String): void<br>
+      + manageSubscriptions(): List&lt;Subscription&gt;
+    </div>
+  </div>
+
+  <!-- Multiplicity: User 1 to 0..* Subscription -->
+  <span class="mult" style="left: 620px; top: 520px;">1</span>
+  <span class="mult" style="left: 595px; top: 640px;">0..*</span>
+
+  <!-- Subscription -->
+  <div class="class-box" style="left: 480px; top: 660px; width: 280px;">
+    <div class="class-name">Subscription</div>
+    <div class="attrs">
+      + subscriptionId: String<br>
+      + frequency: String<br>
+      + status: String
+    </div>
+    <div class="methods">
+      + create(Website): void<br>
+      + update(Website): void<br>
+      + update(FREQUENCY): void<br>
+      + cancel(): void
+    </div>
+  </div>
+
+  <!-- observers multiplicity on Website→Subscription -->
+  <span class="mult" style="left: 290px; top: 380px;">1</span>
+  <span class="mult" style="left: 490px; top: 685px;">0..*</span>
+  <span class="label" style="left: 350px; top: 530px;">observes</span>
+
+  <!-- Notification -->
+  <div class="class-box" style="left: 60px; top: 950px; width: 260px;">
+    <div class="class-name">Notification</div>
+    <div class="attrs">
+      + notificationId: String<br>
+      + message: String
+    </div>
+    <div class="methods">
+      + generate(): void<br>
+      + send(): void
+    </div>
+  </div>
+  <span class="mult" style="left: 530px; top: 860px;">1</span>
+  <span class="mult" style="left: 220px; top: 935px;">0..*</span>
+
+  <!-- NotificationPreference -->
+  <div class="class-box" style="left: 770px; top: 950px; width: 260px;">
+    <div class="class-name">NotificationPreference</div>
+    <div class="attrs">
+      + preferenceId: String<br>
+      + frequency: String<br>
+      + channel: String
+    </div>
+    <div class="methods">
+      + updatePreference(): void
+    </div>
+  </div>
+  <span class="mult" style="left: 710px; top: 860px;">1</span>
+  <span class="mult" style="left: 870px; top: 935px;">1</span>
+
+</div>
+</body>
+</html>
